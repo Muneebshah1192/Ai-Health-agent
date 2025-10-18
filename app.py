@@ -100,16 +100,6 @@ st.markdown("""
         border-radius: 10px;
         border-left: 4px solid #1f77b4;
     }
-    .progress-bar {
-        background-color: #e0e0e0;
-        border-radius: 10px;
-        margin: 0.5rem 0;
-    }
-    .progress-fill {
-        background-color: #1f77b4;
-        height: 8px;
-        border-radius: 10px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -148,12 +138,13 @@ with st.sidebar.expander("Personal Information", expanded=True):
     income = st.selectbox("Income Level", ["Low", "Medium", "High"], index=1)
 
 # Calculate metrics
-activity_map = {"sedentary (little or no exercise)": 1.2, 
-                "light (light exercise 1-3 days/week)": 1.375, 
-                "moderate (moderate exercise 3-5 days/week)": 1.55, 
-                "active (hard exercise 6-7 days/week)": 1.725}
+activity_map = {
+    "sedentary (little or no exercise)": 1.2, 
+    "light (light exercise 1-3 days/week)": 1.375, 
+    "moderate (moderate exercise 3-5 days/week)": 1.55, 
+    "active (hard exercise 6-7 days/week)": 1.725
+}
 
-activity_key = activity_level.split(" (")[0] if " (" in activity_level else activity_level
 bmr = calculate_bmr(weight, height, age, sex)
 tdee = calculate_tdee(bmr, activity_map[activity_level])
 macros = macro_split(tdee)
@@ -178,8 +169,6 @@ if "food_log" not in st.session_state:
     st.session_state.food_log = []
 if "exercise_log" not in st.session_state:
     st.session_state.exercise_log = []
-if "selected_date" not in st.session_state:
-    st.session_state.selected_date = date.today()
 
 # ================= TABS =================
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["🍎 Food Log", "🏋️ Exercise Log", "📊 Daily Totals", "📈 Progress", "🥗 Meal Planner"])
@@ -383,16 +372,17 @@ with tab3:
         st.progress(fats_pct / 100)
     
     # Calorie comparison chart
-    st.markdown("---")
-    st.subheader("🔥 Calorie Balance")
-    
-    fig = go.Figure(data=[
-        go.Bar(name='Calories In', x=['Today'], y=[total_calories], marker_color='#1f77b4'),
-        go.Bar(name='Calories Out', x=['Today'], y=[calories_burned], marker_color='#ff7f0e'),
-        go.Bar(name='TDEE Target', x=['Today'], y=[tdee], marker_color='#2ca02c', opacity=0.6)
-    ])
-    fig.update_layout(barmode='group', showlegend=True, height=300)
-    st.plotly_chart(fig, use_container_width=True)
+    if total_calories > 0:
+        st.markdown("---")
+        st.subheader("🔥 Calorie Balance")
+        
+        fig = go.Figure(data=[
+            go.Bar(name='Calories In', x=['Today'], y=[total_calories], marker_color='#1f77b4'),
+            go.Bar(name='Calories Out', x=['Today'], y=[calories_burned], marker_color='#ff7f0e'),
+            go.Bar(name='TDEE Target', x=['Today'], y=[tdee], marker_color='#2ca02c', opacity=0.6)
+        ])
+        fig.update_layout(barmode='group', showlegend=True, height=300)
+        st.plotly_chart(fig, use_container_width=True)
 
 # ================= PROGRESS TAB =================
 with tab4:
